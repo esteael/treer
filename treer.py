@@ -30,7 +30,9 @@ def count_items(directory_path, filter_mode, filter_extensions):
     total = 0
     for root, dirs, files in os.walk(directory_path):
         total += len(dirs)
-        if filter_mode == 'all':
+        if filter_mode == 'folders':
+            continue
+        elif filter_mode == 'all':
             total += len(files)
         elif filter_mode == 'include':
             for file in files:
@@ -43,7 +45,9 @@ def count_items(directory_path, filter_mode, filter_extensions):
     return total
 
 def should_include_file(filename, filter_mode, filter_extensions):
-    if filter_mode == 'all':
+    if filter_mode == 'folders':
+        return False
+    elif filter_mode == 'all':
         return True
     elif filter_mode == 'include':
         return any(filename.lower().endswith(ext.lower()) for ext in filter_extensions)
@@ -101,7 +105,9 @@ def generate_file_tree(directory_path, filter_mode='all', filter_extensions=None
         f.write("treer - file tree generator\n")
         f.write(f"file tree for: {directory_path}\n")
         f.write(f"generated on: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-        if filter_mode != 'all':
+        if filter_mode == 'folders':
+            f.write("filter mode: folders only\n")
+        elif filter_mode != 'all':
             f.write(f"filter mode: {filter_mode} {', '.join(filter_extensions)}\n")
         f.write("=" * 60 + "\n\n")
         
@@ -113,7 +119,9 @@ def generate_file_tree(directory_path, filter_mode='all', filter_extensions=None
         total_files = 0
         for root, dirs, files in os.walk(directory_path):
             total_dirs += len(dirs)
-            if filter_mode == 'all':
+            if filter_mode == 'folders':
+                continue
+            elif filter_mode == 'all':
                 total_files += len(files)
             else:
                 for file in files:
@@ -127,10 +135,13 @@ def generate_file_tree(directory_path, filter_mode='all', filter_extensions=None
     return str(output_filename)
 
 def get_filter_settings():
-    choice = input("inclusions(i), exclusions(e), or all(*): ").strip().lower()
+    choice = input("inclusions(i), exclusions(e), folders(f) or all(*): ").strip().lower()
     
     if choice in ['', '*', 'all']:
         return 'all', []
+    
+    if choice in ['f', 'folders', 'folder']:
+        return 'folders', []
     
     filter_mode = None
     if choice in ['i', 'inclusions', 'include']:
@@ -179,7 +190,9 @@ def main():
     filter_mode, filter_extensions = get_filter_settings()
     
     print(f"\ngenerating file tree for: {user_input}")
-    if filter_mode != 'all':
+    if filter_mode == 'folders':
+        print("filter mode: folders only")
+    elif filter_mode != 'all':
         print(f"filter mode: {filter_mode} {', '.join(filter_extensions)}")
     print("processing...\n")
     
